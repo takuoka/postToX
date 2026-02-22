@@ -135,7 +135,25 @@ async function postTweet(text) {
 
 async function main() {
   log("main: テキスト取得…");
-  const text = process.argv.slice(2).join(" ") || (await readStdin());
+  let text = null;
+  
+  // コマンドライン引数からJSONを取得
+  if (process.argv[2]) {
+    try {
+      const jsonArg = JSON.parse(process.argv[2]);
+      text = jsonArg.text || null;
+    } catch (e) {
+      log(`JSONパースエラー: ${e}`);
+      console.log(JSON.stringify({ ok: false, error: "INVALID_JSON" }));
+      process.exit(1);
+    }
+  }
+  
+  // JSONが無い場合は標準入力から取得
+  if (!text) {
+    text = await readStdin();
+  }
+  
   if (!text) {
     console.log(JSON.stringify({ ok: false, error: "NO_TEXT" }));
     process.exit(1);
